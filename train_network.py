@@ -16,8 +16,8 @@ parser.add_argument('train_inputs', type=str, help='pattern to true occupancy gr
 parser.add_argument('train_labels', type=str, help='pattern to ablated occupancy grid')
 parser.add_argument('test_inputs', type=str, help='pattern to true occupancy grid')
 parser.add_argument('test_labels', type=str, help='pattern to ablated occupancy grid')
-parser.add_argument('test_out_xs', type=str, help='pattern to true occupancy grid')
-parser.add_argument('test_out_yhats', type=str, help='pattern to ablated occupancy grid')
+parser.add_argument('test_out_ys', type=str, help='pattern to true occupancy grid')
+parser.add_argument('test_out_yhats', type=str, help='pattern to output occupancy grid')
 parser.add_argument(
     '--nepoch', type=int, default=250, help='Number of training epochs')
 parser.add_argument(
@@ -100,7 +100,7 @@ def evaluate_results():
   with torch.no_grad():
     total_loss = 0
     total_testset = 0
-    Xs_lst = []
+    ys_lst = []
     yhats_lst = []    
     for i, data in enumerate(test_dataloader, 0):
       Xs, ys = data
@@ -108,13 +108,13 @@ def evaluate_results():
       yhats, _ = model(Xs)
       total_testset += yhats.shape[0]
       total_loss += my_loss(yhats, ys)
-      Xs_lst.append(Xs.cpu().numpy())
+      ys_lst.append(ys.cpu().numpy())
       yhats_lst.append(yhats.cpu().numpy())
       
-    Xs_stack = np.concatenate(Xs_lst, axis=0)
+    ys_stack = np.concatenate(ys_lst, axis=0)
     yhats_stack = np.concatenate(yhats_lst, axis=0) 
-    joblib.dump(Xs_stack, opt.test_out_xs)
-    joblib.dump(Xs_stack, opt.test_out_yhats)
+    joblib.dump(ys_stack, opt.test_out_ys)
+    joblib.dump(yhats_stack, opt.test_out_yhats)
     print("average test set loss {}".format(total_loss / float(total_testset)))
 
 evaluate_results()
