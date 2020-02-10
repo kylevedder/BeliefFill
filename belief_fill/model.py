@@ -9,6 +9,8 @@ import torch.nn.functional as F
 class OccupancyRepair(nn.Module):
     def __init__(self, bottle_neck, image_width, image_height):
         super().__init__()
+        self.image_width = image_width
+        self.image_height = image_height
         self.code_size = bottle_neck
         
         self.enc_cnn_1 = nn.Conv2d(1, 10, kernel_size=5)
@@ -29,7 +31,7 @@ class OccupancyRepair(nn.Module):
         x = F.selu(F.max_pool2d(x, 2))
         x = self.enc_cnn_2(x)
         x = F.selu(F.max_pool2d(x, 2))
-        x = x.view([images.size(0), -1])
+        x = x.view([x.size(0), -1])
         x = F.selu(self.enc_linear_1(x))
         x = self.enc_linear_2(x)
         return x
@@ -37,5 +39,5 @@ class OccupancyRepair(nn.Module):
     def decode(self, code):
         out = F.selu(self.dec_linear_1(code))
         out = F.sigmoid(self.dec_linear_2(out))
-        out = out.view([code.size(0), 1, image_width, image_height])
+        out = out.view([code.size(0), 1, self.image_width, self.image_height])
         return out
