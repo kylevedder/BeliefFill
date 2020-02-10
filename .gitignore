@@ -3,3 +3,5 @@
 *.mp4
 *.png
 *.out
+.vscode/
+data/
