@@ -15,16 +15,16 @@ class OccupancyRepair(nn.Module):
         
         self.enc_cnn_1 = nn.Conv2d(1, 10, kernel_size=5)
         self.enc_cnn_2 = nn.Conv2d(10, 20, kernel_size=5)
-        self.enc_linear_1 = nn.Linear(4 * 4 * 20, 50)
+        self.enc_linear_1 = nn.Linear(9680, 50)
         self.enc_linear_2 = nn.Linear(50, self.code_size)
         
         self.dec_linear_1 = nn.Linear(self.code_size, 160)
         self.dec_linear_2 = nn.Linear(160, image_width * image_height)
         
-    def forward(self, images):
-        code = self.encode(images)
-        out = self.decode(code)
-        return out, code
+    def forward(self, x):
+        encoding = self.encode(x)
+        x = self.decode(encoding)
+        return x, encoding
     
     def encode(self, x):
         x = self.enc_cnn_1(x)
