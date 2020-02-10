@@ -7,4 +7,5 @@
 data/
 *.egg-info/
 *.xs
+*.ys
 *.yhats
