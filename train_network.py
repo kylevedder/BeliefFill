@@ -59,6 +59,9 @@ test_dataloader = torch.utils.data.DataLoader(
         num_workers=int(opt.workers))
 
 model = OccupancyRepair(50, 100, 100)
+if opt.model != '':
+  model.load_state_dict(torch.load(opt.model))
+model.cuda()
 
 def my_loss(pred, target):
   pred = pred / torch.max(pred)
