@@ -11,6 +11,7 @@ class OccupancyDataset(data.Dataset):
         label_files_lst = sorted(list(glob.glob(label_files)))
 
         assert(len(input_files_lst) == len(label_files_lst))
+        assert(len(input_files_lst) > 0)
 
         input_data_lst = [joblib.load(f) for f in input_files_lst]
         label_data_lst = [joblib.load(f) for f in label_files_lst]
@@ -20,8 +21,8 @@ class OccupancyDataset(data.Dataset):
         input_data = np.concatenate(input_data_lst, 0)
         label_data = np.concatenate(label_data_lst, 0)
 
-        self.Xs = input_data.astype(np.float32)
-        self.ys = label_data.astype(np.float32)
+        self.Xs = np.expand_dims(input_data.astype(np.float32), 1)
+        self.ys = np.expand_dims(label_data.astype(np.float32), 1)
 
         print("Loaded {} Xs and {} ys".format(self.Xs.shape[0], self.ys.shape[0]))
         assert(self.Xs.shape == self.ys.shape)
