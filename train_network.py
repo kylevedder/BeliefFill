@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
-from model.dataloader import OccupancyDataset
-from model.model import OccupancyRepair
+from belief_fill.dataloader import OccupancyDataset
+from belief_fill.model import OccupancyRepair
 import os
 import random
 import argparse

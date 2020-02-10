@@ -2,8 +2,8 @@
 
 from setuptools import setup
 
-setup(name='BeliefFill',
-      packages=['BeliefFill'],
-      package_dir={'BeliefFill': 'BeliefFill'},
-      install_requires=['torch'],
+setup(name='belief_fill',
+      packages=['belief_fill'],
+      package_dir={'belief_fill': 'belief_fill'},
+      install_requires=['torch', 'numpy', 'joblib'],
     version='0.0.1')
