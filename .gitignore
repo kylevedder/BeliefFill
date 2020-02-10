@@ -6,3 +6,5 @@
 .vscode/
 data/
 *.egg-info/
+*.xs
+*.yhats

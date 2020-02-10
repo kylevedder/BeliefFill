@@ -64,7 +64,6 @@ if opt.model != '':
 model.cuda()
 
 def my_loss(pred, target):
-  pred = pred / torch.max(pred)
   return torch.sum((pred - target)**2)
 
 
@@ -109,8 +108,8 @@ def evaluate_results():
       yhats, _ = model(Xs)
       total_testset += yhats.shape[0]
       total_loss += my_loss(yhats, ys)
-      Xs_lst.append(Xs.cpu())
-      yhats_lst.append(yhats.cpu())
+      Xs_lst.append(Xs.cpu().numpy())
+      yhats_lst.append(yhats.cpu().numpy())
       
     Xs_stack = np.concatenate(Xs_lst, axis=0)
     yhats_stack = np.concatenate(yhats_lst, axis=0) 

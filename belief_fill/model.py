@@ -40,4 +40,4 @@ class OccupancyRepair(nn.Module):
         out = F.selu(self.dec_linear_1(code))
         out = F.sigmoid(self.dec_linear_2(out))
         out = out.view([code.size(0), 1, self.image_width, self.image_height])
-        return out
+        return out / torch.max(out)
