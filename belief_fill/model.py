@@ -39,5 +39,6 @@ class OccupancyRepair(nn.Module):
     def decode(self, code):
         out = F.selu(self.dec_linear_1(code))
         out = F.sigmoid(self.dec_linear_2(out))
+        out = out / out.max(1, keepdim=True)[0]
         out = out.view([code.size(0), 1, self.image_width, self.image_height])
-        return out / torch.max(out)
+        return
