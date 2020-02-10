@@ -109,10 +109,10 @@ def evaluate_results():
       yhats, _ = model(Xs)
       total_testset += yhats.shape[0]
       total_loss += my_loss(yhats, ys)
-      Xs_lst.append(Xs)
-      yhats_lst.append(yhats)
+      Xs_lst.append(Xs.cpu())
+      yhats_lst.append(yhats.cpu())
       
-    Xs_stack = np.concatenate(Xs, axis=0)
+    Xs_stack = np.concatenate(Xs_lst, axis=0)
     yhats_stack = np.concatenate(yhats_lst, axis=0) 
     joblib.dump(Xs_stack, opt.test_out_xs)
     joblib.dump(Xs_stack, opt.test_out_yhats)
