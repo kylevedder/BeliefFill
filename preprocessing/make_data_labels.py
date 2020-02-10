@@ -8,9 +8,15 @@ import cv2
 
 parser = argparse.ArgumentParser(description='Convert laser scans to occupancy grids.')
 parser.add_argument('scans', type=str, help='scan data file')
+parser.add_argument('true', type=str, help='true occupancy grid')
+parser.add_argument('ablated', type=str, help='ablated occupancy grid')
 args = parser.parse_args()
 
 message_lst = joblib.load(args.scans)
+
+
+def ablate_scan_region(scan, min_idx, max_idx):
+  return scan._replace(ranges = (e if idx < min_idx or idx > max_idx else scan.range_max + 1 for idx, e in enumerate(scan.ranges) ) )
 
 def scan_to_cartesian_points(scan):
   points = []
@@ -23,12 +29,14 @@ def scan_to_cartesian_points(scan):
     y = np.sin(angle) * r
     points.append((x, y))
   return points
-    
-points_lst = [scan_to_cartesian_points(m) for m in message_lst]
-print([len(p) for p in points_lst][:10])
 
-
-def points_to_occupancy(points, x_min, x_max, x_num_cells, y_min, y_max, y_num_cells):
+def points_to_occupancy(points):
+  x_min = -1.5
+  x_max = 8.5
+  x_num_cells = 100
+  y_min = -5
+  y_max = 5
+  y_num_cells = 100
   occupancy = np.zeros((x_num_cells, y_num_cells))
 
   def xy_to_cell_idx(x, y):
@@ -51,45 +59,40 @@ def points_to_occupancy(points, x_min, x_max, x_num_cells, y_min, y_max, y_num_c
 
   return occupancy
 
-
-x_min = -1.5
-x_max = 8.5
-x_num_cells = 100
-y_min = -5
-y_max = 5
-y_num_cells = 100
-
-occupancy_lst = [points_to_occupancy(p, x_min, x_max, x_num_cells, y_min, y_max, y_num_cells) for p in points_lst]
-occupancy_lst = [np.expand_dims(o, 0) for o in occupancy_lst]
-occupancy_stack = np.concatenate(occupancy_lst, 0)
-
 kBlurKernel = np.loadtxt('gaussian_blur.matrix', delimiter=',')
 
 def blur_image(img):
   blurred_image = cv2.filter2D(img, -1, kBlurKernel)
   return blurred_image / np.amax(blurred_image)
-  # return cv2.GaussianBlur(img, (5,5), sigmaX=3, sigmaY=3, borderType=cv2.BORDER_REPLICATE)
 
-blurred_occupancy_lst = [blur_image(o) for o in occupancy_lst]
-blurred_occupancy_stack = np.concatenate(blurred_occupancy_lst, 0)
+def make_stack(lst):
+  return np.concatenate([np.expand_dims(e, 0) for e in lst])
 
-for i in range(500):
+points_lst = [scan_to_cartesian_points(m) for m in message_lst]
+occupancy_lst = [points_to_occupancy(p) for p in points_lst]
 
-  # plt.imshow(occupancy_stack[i + 100], cmap='gray')
-  # plt.colorbar()
-  # name = 'img{0:05d}_occ.png'.format(i + 100)
-  # plt.title(name)
-  # plt.savefig(name)
-  # plt.clf()
-  name = 'img{0:05d}_raw_blur.png'.format(i)
-  plt.subplot(121)
-  plt.title("{0:05d} raw".format(i))
-  plt.imshow(occupancy_stack[i], cmap='gray')
-  plt.clim(0, 1)
-  plt.subplot(122)
-  plt.title("{0:05d} blur".format(i))
-  plt.imshow(blurred_occupancy_stack[i], cmap='gray')
-  plt.clim(0, 1)
-  plt.savefig(name)
-  plt.clf()
-  print(i)
+ablated_message_lst = [ablate_scan_region(m, 200, 250) for m in message_lst]
+ablated_points_lst = [scan_to_cartesian_points(m) for m in ablated_message_lst]
+ablated_occupancy_lst = [points_to_occupancy(p) for p in ablated_points_lst]
+
+blurred_occupancy_lst = [blur_image(i) for i in occupancy_lst]
+ablated_blurred_occupancy_lst = [blur_image(i) for i in ablated_occupancy_lst]
+
+occupancy_stack = make_stack(blurred_occupancy_lst)
+ablated_occupancy_stack = make_stack(ablated_blurred_occupancy_lst)
+
+joblib.dump(occupancy_stack, args.true)
+joblib.dump(ablated_occupancy_stack, args.ablated)
+
+# for i in range(100):
+#   raw = occupancy_lst[i][0]
+#   ablated = ablated_occupancy_lst[i][0]
+#   diff = raw - ablated
+#   plt.subplot(131)
+#   plt.imshow(raw)
+#   plt.subplot(132)
+#   plt.imshow(ablated)
+#   plt.subplot(133)
+#   plt.imshow(diff)
+#   plt.savefig("img{0:05d}.png".format(i))
+#   plt.clf()
