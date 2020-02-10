@@ -12,10 +12,10 @@ import numpy as np
 import joblib
 
 parser = argparse.ArgumentParser(description='Train network.')
-parser.add_argument('train_inputs', type=str, help='pattern to true occupancy grid')
-parser.add_argument('train_labels', type=str, help='pattern to ablated occupancy grid')
-parser.add_argument('test_inputs', type=str, help='pattern to true occupancy grid')
-parser.add_argument('test_labels', type=str, help='pattern to ablated occupancy grid')
+parser.add_argument('train_xs', type=str, help='pattern to true occupancy grid')
+parser.add_argument('train_ys', type=str, help='pattern to ablated occupancy grid')
+parser.add_argument('test_xs', type=str, help='pattern to true occupancy grid')
+parser.add_argument('test_ys', type=str, help='pattern to ablated occupancy grid')
 parser.add_argument('test_out_xs', type=str, help='path to input occupancy grid')
 parser.add_argument('test_out_ys', type=str, help='path to true occupancy grid')
 parser.add_argument('test_out_yhats', type=str, help='path to output occupancy grid')
@@ -44,8 +44,8 @@ try:
 except OSError:
     pass
 
-train_dataset = OccupancyDataset(opt.train_inputs, opt.train_labels)
-test_dataset = OccupancyDataset(opt.test_inputs, opt.test_labels)
+train_dataset = OccupancyDataset(opt.train_xs, opt.train_ys)
+test_dataset = OccupancyDataset(opt.test_xs, opt.test_ys)
 
 train_dataloader = torch.utils.data.DataLoader(
     train_dataset,

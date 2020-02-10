@@ -66,7 +66,7 @@ def blur_image(img):
   return blurred_image / np.amax(blurred_image)
 
 def make_stack(lst):
-  return np.concatenate([np.expand_dims(e, 0) for e in lst])
+  return np.concatenate([np.expand_dims(e, 0) for e in lst]).astype(np.float32)
 
 points_lst = [scan_to_cartesian_points(m) for m in message_lst]
 occupancy_lst = [points_to_occupancy(p) for p in points_lst]
@@ -78,21 +78,24 @@ ablated_occupancy_lst = [points_to_occupancy(p) for p in ablated_points_lst]
 blurred_occupancy_lst = [blur_image(i) for i in occupancy_lst]
 ablated_blurred_occupancy_lst = [blur_image(i) for i in ablated_occupancy_lst]
 
-occupancy_stack = make_stack(blurred_occupancy_lst)
-ablated_occupancy_stack = make_stack(ablated_blurred_occupancy_lst)
+blurred_occupancy_stack = make_stack(blurred_occupancy_lst)
+blurred_ablated_occupancy_stack = make_stack(ablated_blurred_occupancy_lst)
 
-joblib.dump(occupancy_stack, args.true)
-joblib.dump(ablated_occupancy_stack, args.ablated)
+joblib.dump(blurred_occupancy_stack, args.true)
+joblib.dump(blurred_ablated_occupancy_stack, args.ablated)
 
 # for i in range(100):
-#   raw = occupancy_lst[i][0]
-#   ablated = ablated_occupancy_lst[i][0]
+#   raw = blurred_occupancy_lst[i]
+#   ablated = ablated_blurred_occupancy_lst[i]
 #   diff = raw - ablated
 #   plt.subplot(131)
-#   plt.imshow(raw)
+#   plt.imshow(raw, cmap='gray')
+#   plt.clim(0, 1)
 #   plt.subplot(132)
-#   plt.imshow(ablated)
+#   plt.imshow(ablated, cmap='gray')
+#   plt.clim(0, 1)
 #   plt.subplot(133)
-#   plt.imshow(diff)
+#   plt.imshow(diff, cmap='gray')
+#   plt.clim(0, 1)
 #   plt.savefig("img{0:05d}.png".format(i))
 #   plt.clf()
